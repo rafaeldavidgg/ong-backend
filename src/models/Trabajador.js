@@ -7,6 +7,7 @@ const trabajadorSchema = new Schema(
     fechaIncorporacion: { type: Date, required: true },
     email: { type: String, required: true, unique: true },
     contraseña: { type: String, required: true, select: false },
+    tipo: { type: String, enum: ["Auxiliar", "Tecnico"], required: true },
   },
   { timestamps: true }
 );

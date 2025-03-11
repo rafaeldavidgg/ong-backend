@@ -19,7 +19,7 @@ const incidenciaSchema = new Schema(
     },
     descripcion: { type: String },
     usuario: { type: Schema.Types.ObjectId, ref: "Usuario", required: true },
-    creadaPor: { type: Schema.Types.ObjectId, ref: "Auxiliar", required: true },
+    creadaPor: { type: Schema.Types.ObjectId, ref: "Trabajador", required: true },
   },
   { timestamps: true }
 );

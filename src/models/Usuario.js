@@ -19,6 +19,7 @@ const usuarioSchema = new Schema(
     },
     gradoAutismo: { type: Number, min: 1, max: 100, required: true },
     grupoTrabajo: { type: Number, required: true },
+    auxiliaresAsignados: [{ type: Schema.Types.ObjectId, ref: "Trabajador" }],
   },
   { timestamps: true }
 );
