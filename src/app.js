@@ -14,6 +14,7 @@ app.get("/", (req, res) => {
   res.send("Bienvenido a mi API Rest full");
 });
 
+app.use("/api/auth", require("./routes/auth"));
 app.use("/api/usuarios", require("./routes/usuario"));
 app.use("/api/familiares", require("./routes/familiar"));
 app.use("/api/trabajadores", require("./routes/trabajador"));
