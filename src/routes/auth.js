@@ -1,6 +1,7 @@
 const express = require("express");
 const { login, validateToken } = require("../controllers/auth.controller");
 const { check } = require("express-validator");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -13,6 +14,6 @@ router.post(
   login
 );
 
-router.get("/validate-token", validateToken);
+router.get("/validate-token", authMiddleware, validateToken);
 
 module.exports = router;

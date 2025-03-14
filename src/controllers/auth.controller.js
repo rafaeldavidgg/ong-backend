@@ -44,8 +44,12 @@ exports.login = async (req, res) => {
 
 exports.validateToken = async (req, res) => {
   try {
-    const token = req.header("Authorization");
-    if (!token) return res.status(401).json({ message: "Acceso denegado" });
+    const authHeader = req.header("Authorization");
+    if (!authHeader)
+      return res.status(401).json({ message: "Acceso denegado" });
+
+    const token = authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Token no válido" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     res.json({ message: "Token válido", usuario: decoded });
