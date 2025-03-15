@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const router = Router();
+const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   getUsers,
@@ -9,13 +10,15 @@ const {
   updateUserById,
 } = require("../controllers/usuario.controller");
 
-router.route("/")
-  .get(getUsers)
-  .post(createUser);
+router
+  .route("/")
+  .get(authMiddleware, getUsers)
+  .post(authMiddleware, createUser);
 
-router.route("/:id")
-  .get(getUserById)
-  .delete(deleteUserById)
-  .put(updateUserById);
+router
+  .route("/:id")
+  .get(authMiddleware, getUserById)
+  .delete(authMiddleware, deleteUserById)
+  .put(authMiddleware, updateUserById);
 
 module.exports = router;

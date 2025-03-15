@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const router = Router();
+const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   getTrabajadores,
@@ -11,19 +12,25 @@ const {
 
 router
   .route("/")
-  .get((req, res, next) => {
-    const { tipo } = req.query;
-    if (tipo && !["Auxiliar", "Tecnico"].includes(tipo)) {
-      return res.status(400).json({ message: "Tipo de trabajador no válido" });
-    }
-    next();
-  }, getTrabajadores)
-  .post(createTrabajador);
+  .get(
+    authMiddleware,
+    (req, res, next) => {
+      const { tipo } = req.query;
+      if (tipo && !["Auxiliar", "Tecnico"].includes(tipo)) {
+        return res
+          .status(400)
+          .json({ message: "Tipo de trabajador no válido" });
+      }
+      next();
+    },
+    getTrabajadores
+  )
+  .post(authMiddleware, createTrabajador);
 
 router
   .route("/:id")
-  .get(getTrabajadorById)
-  .put(updateTrabajadorById)
-  .delete(deleteTrabajadorById);
+  .get(authMiddleware, getTrabajadorById)
+  .put(authMiddleware, updateTrabajadorById)
+  .delete(authMiddleware, deleteTrabajadorById);
 
 module.exports = router;
