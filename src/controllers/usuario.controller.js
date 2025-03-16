@@ -3,25 +3,35 @@ const Usuario = require("../models/Usuario");
 
 usuarioCtrl.getUsers = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    const grupoTrabajo = req.query.grupoTrabajo;
+    const { page = 1, limit = 10, grupoTrabajo, search } = req.query;
 
-    let query = {};
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    let filtro = {};
+
     if (grupoTrabajo) {
-      query.grupoTrabajo = grupoTrabajo;
+      filtro.grupoTrabajo = grupoTrabajo;
     }
 
-    const totalUsuarios = await Usuario.countDocuments(query);
+    if (search) {
+      filtro.$or = [
+        { nombre: { $regex: search, $options: "i" } },
+        { apellido: { $regex: search, $options: "i" } },
+        { dni: { $regex: search, $options: "i" } },
+        { tipoAutismo: { $regex: search, $options: "i" } },
+      ];
+    }
 
-    const usuarios = await Usuario.find(query).skip(skip).limit(limit);
+    const totalUsuarios = await Usuario.countDocuments(filtro);
+    const usuarios = await Usuario.find(filtro).skip(skip).limit(limitNumber);
 
     res.json({
       usuarios,
       totalUsuarios,
-      totalPages: Math.ceil(totalUsuarios / limit),
-      currentPage: page,
+      totalPages: Math.ceil(totalUsuarios / limitNumber) || 1,
+      currentPage: pageNumber,
     });
   } catch (error) {
     res.status(500).json({ message: "Error obteniendo usuarios", error });
