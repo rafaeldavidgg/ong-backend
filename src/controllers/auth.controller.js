@@ -11,7 +11,9 @@ exports.login = async (req, res) => {
 
     if (!usuario) {
       usuario = await Trabajador.findOne({ email }).select("+contraseña");
-      tipoUsuario = usuario.tipo;
+      if (usuario) {
+        tipoUsuario = usuario.tipo;
+      }
     }
 
     if (!usuario)
