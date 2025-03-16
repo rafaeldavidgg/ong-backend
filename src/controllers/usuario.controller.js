@@ -3,8 +3,26 @@ const Usuario = require("../models/Usuario");
 
 usuarioCtrl.getUsers = async (req, res) => {
   try {
-    const usuarios = await Usuario.find();
-    res.json(usuarios);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const grupoTrabajo = req.query.grupoTrabajo;
+
+    let query = {};
+    if (grupoTrabajo) {
+      query.grupoTrabajo = grupoTrabajo;
+    }
+
+    const totalUsuarios = await Usuario.countDocuments(query);
+
+    const usuarios = await Usuario.find(query).skip(skip).limit(limit);
+
+    res.json({
+      usuarios,
+      totalUsuarios,
+      totalPages: Math.ceil(totalUsuarios / limit),
+      currentPage: page,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error obteniendo usuarios", error });
   }
@@ -30,11 +48,9 @@ usuarioCtrl.createUser = async (req, res) => {
       !tipoAutismo ||
       !grupoTrabajo
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "Todos los campos obligatorios deben ser proporcionados",
-        });
+      return res.status(400).json({
+        message: "Todos los campos obligatorios deben ser proporcionados",
+      });
     }
 
     const newUser = new Usuario({
