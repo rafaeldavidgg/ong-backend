@@ -3,10 +3,34 @@ const Trabajador = require("../models/Trabajador");
 
 trabajadorCtrl.getTrabajadores = async (req, res) => {
   try {
-    const { tipo } = req.query;
-    const filtro = tipo ? { tipo } : {};
-    const trabajadores = await Trabajador.find(filtro);
-    res.json(trabajadores);
+    const { page = 1, limit = 10, search } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const filtro = search
+      ? {
+          $or: [
+            { nombre: { $regex: search, $options: "i" } },
+            { apellido: { $regex: search, $options: "i" } },
+            { tipo: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const totalTrabajadores = await Trabajador.countDocuments(filtro);
+
+    const trabajadores = await Trabajador.find(filtro)
+      .skip(skip)
+      .limit(limitNumber);
+
+    res.json({
+      trabajadores,
+      totalTrabajadores,
+      totalPages: Math.ceil(totalTrabajadores / limitNumber),
+      currentPage: pageNumber,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error obteniendo trabajadores", error });
   }
