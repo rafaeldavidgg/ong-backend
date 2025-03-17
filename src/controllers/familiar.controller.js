@@ -3,8 +3,35 @@ const Familiar = require("../models/Familiar");
 
 familiarCtrl.getFamiliares = async (req, res) => {
   try {
-    const familiares = await Familiar.find();
-    res.json(familiares);
+    const { page = 1, limit = 10, search } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const filtro = search
+      ? {
+          $or: [
+            { nombre: { $regex: search, $options: "i" } },
+            { apellido: { $regex: search, $options: "i" } },
+            { dni: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const totalFamiliares = await Familiar.countDocuments(filtro);
+
+    const familiares = await Familiar.find(filtro)
+      .skip(skip)
+      .limit(limitNumber);
+
+    res.json({
+      familiares,
+      totalFamiliares,
+      totalPages: Math.ceil(totalFamiliares / limitNumber) || 1,
+      currentPage: pageNumber,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error obteniendo familiares", error });
   }
