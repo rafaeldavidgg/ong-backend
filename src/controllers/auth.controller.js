@@ -1,5 +1,6 @@
 const Familiar = require("../models/Familiar");
 const Trabajador = require("../models/Trabajador");
+const Usuario = require("../models/Usuario");
 const jwt = require("jsonwebtoken");
 
 exports.login = async (req, res) => {
@@ -29,12 +30,13 @@ exports.login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
+    const { contraseña: _, ...usuarioSinContraseña } = usuario.toObject();
+
     res.json({
       token,
       usuario: {
-        id: usuario._id,
-        email: usuario.email,
-        tipo: tipoUsuario,
+        ...usuarioSinContraseña,
+        rol: tipoUsuario,
       },
     });
   } catch (error) {
@@ -54,7 +56,24 @@ exports.validateToken = async (req, res) => {
     if (!token) return res.status(401).json({ message: "Token no válido" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ message: "Token válido", usuario: decoded });
+
+    let usuario =
+      (await Familiar.findById(decoded.id)) ||
+      (await Trabajador.findById(decoded.id)) ||
+      (await Usuario.findById(decoded.id));
+
+    if (!usuario)
+      return res.status(401).json({ message: "Usuario no encontrado" });
+
+    const { contraseña: _, ...usuarioSinContraseña } = usuario.toObject();
+
+    res.json({
+      message: "Token válido",
+      usuario: {
+        ...usuarioSinContraseña,
+        rol: decoded.tipo,
+      },
+    });
   } catch (error) {
     res.status(401).json({ message: "Token inválido" });
   }
