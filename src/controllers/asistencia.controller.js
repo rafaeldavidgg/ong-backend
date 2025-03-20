@@ -2,11 +2,24 @@ const Asistencia = require("../models/Asistencia");
 
 exports.crearAsistencia = async (req, res) => {
   try {
-    const nuevaAsistencia = new Asistencia(req.body);
-    const asistenciaGuardada = await nuevaAsistencia.save();
-    res.status(201).json(asistenciaGuardada);
+      const { fecha, usuario } = req.body;
+
+      const fechaISO = new Date(fecha).toISOString().split("T")[0];
+
+      const asistenciaExistente = await Asistencia.findOne({
+          usuario,
+          fecha: { $gte: new Date(fechaISO), $lt: new Date(`${fechaISO}T23:59:59.999Z`) }
+      });
+
+      if (asistenciaExistente) {
+          return res.status(400).json({ message: "Ya hay una falta para este usuario en ese día." });
+      }
+
+      const nuevaAsistencia = new Asistencia(req.body);
+      const asistenciaGuardada = await nuevaAsistencia.save();
+      res.status(201).json(asistenciaGuardada);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al crear la asistencia", error });
+      res.status(500).json({ message: "Error al crear la asistencia", error });
   }
 };
 
