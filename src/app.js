@@ -18,5 +18,6 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/usuarios", require("./routes/usuario"));
 app.use("/api/familiares", require("./routes/familiar"));
 app.use("/api/trabajadores", require("./routes/trabajador"));
+app.use("/api/asistencias", require("./routes/asistencia"));
 
 module.exports = app;
