@@ -135,4 +135,23 @@ usuarioCtrl.deleteUserById = async (req, res) => {
   }
 };
 
+usuarioCtrl.getUsuariosByIds = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Debes proporcionar un array de IDs" });
+    }
+
+    const usuarios = await Usuario.find({ _id: { $in: ids } });
+    res.json(usuarios);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error obteniendo usuarios asociados", error });
+  }
+};
+
 module.exports = usuarioCtrl;
