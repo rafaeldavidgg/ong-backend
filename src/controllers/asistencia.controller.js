@@ -77,17 +77,32 @@ exports.obtenerAsistencias = async (req, res) => {
 exports.obtenerAsistenciasPorUsuario = async (req, res) => {
   try {
     const { usuarioId } = req.params;
+    const { page = 1, limit = 10, search = "" } = req.query;
 
-    const asistencias = await Asistencia.find({ usuario: usuarioId })
-      .populate("usuario", "nombre email")
-      .populate("justificadaPor", "nombre email")
-      .sort({ fecha: -1 });
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const filtro = {
+      usuario: usuarioId,
+    };
 
-    res.status(200).json(asistencias);
+    if (search) {
+      filtro.descripcion = { $regex: search, $options: "i" };
+    }
+
+    const asistencias = await Asistencia.find(filtro)
+      .populate("usuario", "nombre apellido")
+      .sort({ fecha: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Asistencia.countDocuments(filtro);
+
+    res.status(200).json({
+      asistencias,
+      totalPages: Math.ceil(total / limit) || 1,
+      currentPage: parseInt(page),
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ mensaje: "Error al obtener asistencias del usuario", error });
+    res.status(500).json({ message: "Error al obtener asistencias", error });
   }
 };
 
