@@ -21,5 +21,6 @@ app.use("/api/trabajadores", require("./routes/trabajador"));
 app.use("/api/asistencias", require("./routes/asistencia"));
 app.use("/api/solicitudes", require("./routes/solicitudes"));
 app.use("/api/tipo-actividades", require("./routes/tipoActividad"));
+app.use("/api/actividades", require("./routes/actividad"));
 
 module.exports = app;
