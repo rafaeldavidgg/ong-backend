@@ -8,12 +8,15 @@ const {
   createActividad,
   updateActividadById,
   deleteActividadById,
+  getActividadesPorUsuario,
 } = require("../controllers/actividad.controller");
 
 router
   .route("/")
   .get(authMiddleware, getActividades)
   .post(authMiddleware, createActividad);
+
+router.route("/usuario").get(authMiddleware, getActividadesPorUsuario);
 
 router
   .route("/:id")

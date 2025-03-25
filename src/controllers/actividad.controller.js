@@ -130,4 +130,53 @@ actividadCtrl.deleteActividadById = async (req, res) => {
   }
 };
 
+actividadCtrl.getActividadesPorUsuario = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, tipos, usuarioId } = req.query;
+
+    if (!usuarioId) {
+      return res.status(400).json({ message: "Falta el parámetro usuarioId" });
+    }
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const filtro = {
+      realizadaPor: usuarioId,
+    };
+
+    if (search) {
+      filtro.nombre = { $regex: search, $options: "i" };
+    }
+
+    if (tipos) {
+      const tipoArray = Array.isArray(tipos) ? tipos : tipos.split(",");
+      filtro.tipoActividad = { $in: tipoArray };
+    }
+
+    const totalActividades = await Actividad.countDocuments(filtro);
+
+    const actividades = await Actividad.find(filtro)
+      .populate("tipoActividad", "nombreTipo")
+      .populate("realizadaPor", "nombre apellido")
+      .populate("ejecutadaPor", "nombre apellido")
+      .populate("creadaPor", "nombre apellido")
+      .sort({ fecha: -1 })
+      .skip(skip)
+      .limit(limitNumber);
+
+    res.json({
+      actividades,
+      totalActividades,
+      totalPages: Math.ceil(totalActividades / limitNumber) || 1,
+      currentPage: pageNumber,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error obteniendo actividades del usuario", error });
+  }
+};
+
 module.exports = actividadCtrl;
