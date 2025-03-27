@@ -1,5 +1,6 @@
 const trabajadorCtrl = {};
 const Trabajador = require("../models/Trabajador");
+const Familiar = require("../models/Familiar");
 
 trabajadorCtrl.getTrabajadores = async (req, res) => {
   try {
@@ -55,6 +56,14 @@ trabajadorCtrl.createTrabajador = async (req, res) => {
       });
     }
 
+    const existingTrabajador = await Trabajador.findOne({ email });
+    const existingFamiliar = await Familiar.findOne({ email });
+    if (existingTrabajador || existingFamiliar) {
+      return res.status(400).json({
+        message: "Ya existe un usuario registrado con ese email",
+      });
+    }
+
     if (!["Auxiliar", "Tecnico"].includes(tipo)) {
       return res.status(400).json({ message: "Tipo de trabajador no válido" });
     }
@@ -104,6 +113,17 @@ trabajadorCtrl.updateTrabajadorById = async (req, res) => {
     const trabajador = await Trabajador.findById(req.params.id);
     if (!trabajador)
       return res.status(404).json({ message: "Trabajador no encontrado" });
+
+    if (email !== trabajador.email) {
+      const existingTrabajador = await Trabajador.findOne({ email });
+      const existingFamiliar = await Familiar.findOne({ email });
+
+      if (existingTrabajador || existingFamiliar) {
+        return res.status(400).json({
+          message: "Ya existe otro usuario con ese email",
+        });
+      }
+    }
 
     trabajador.nombre = nombre;
     trabajador.apellido = apellido;

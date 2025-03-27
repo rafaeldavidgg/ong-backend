@@ -1,5 +1,6 @@
 const familiarCtrl = {};
 const Familiar = require("../models/Familiar");
+const Trabajador = require("../models/Trabajador");
 
 familiarCtrl.getFamiliares = async (req, res) => {
   try {
@@ -55,6 +56,14 @@ familiarCtrl.createFamiliar = async (req, res) => {
       });
     }
 
+    const existingFamiliar = await Familiar.findOne({ email });
+    const existingTrabajador = await Trabajador.findOne({ email });
+    if (existingFamiliar || existingTrabajador) {
+      return res.status(400).json({
+        message: "Ya existe un usuario registrado con ese email",
+      });
+    }
+
     const newFamiliar = new Familiar({
       nombre,
       apellido,
@@ -98,6 +107,17 @@ familiarCtrl.updateFamiliarById = async (req, res) => {
     if (!familiar)
       return res.status(404).json({ message: "Familiar no encontrado" });
 
+    if (email !== familiar.email) {
+      const existingFamiliar = await Familiar.findOne({ email });
+      const existingTrabajador = await Trabajador.findOne({ email });
+
+      if (existingFamiliar || existingTrabajador) {
+        return res.status(400).json({
+          message: "Ya existe otro usuario con ese email",
+        });
+      }
+    }
+
     familiar.nombre = nombre;
     familiar.apellido = apellido;
     familiar.telefono = telefono;
@@ -105,7 +125,6 @@ familiarCtrl.updateFamiliarById = async (req, res) => {
     familiar.tipoDeRelacionConUsuario = tipoDeRelacionConUsuario;
     familiar.email = email;
 
-    // Si se proporciona una nueva contraseña, actualizarla (se encriptará automáticamente por el modelo)
     if (contraseña) {
       familiar.contraseña = contraseña;
     }
