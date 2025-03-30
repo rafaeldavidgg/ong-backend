@@ -23,4 +23,6 @@ app.use("/api/solicitudes", require("./routes/solicitudes"));
 app.use("/api/tipo-actividades", require("./routes/tipoActividad"));
 app.use("/api/actividades", require("./routes/actividad"));
 
+require("./cron/notificacionActividades");
+
 module.exports = app;
