@@ -179,4 +179,37 @@ actividadCtrl.getActividadesPorUsuario = async (req, res) => {
   }
 };
 
+actividadCtrl.getActividadesPorUsuarioYMes = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { year, month } = req.query;
+
+    if (!year || !month) {
+      return res
+        .status(400)
+        .json({ message: "Faltan parámetros de año o mes" });
+    }
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const actividades = await Actividad.find({
+      realizadaPor: id,
+      fecha: { $gte: startDate, $lte: endDate },
+    })
+      .populate("tipoActividad", "nombreTipo")
+      .populate("realizadaPor", "nombre apellido")
+      .populate("ejecutadaPor", "nombre apellido")
+      .populate("creadaPor", "nombre apellido")
+      .sort({ fecha: 1 });
+
+    res.json(actividades);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener actividades por usuario y mes",
+      error,
+    });
+  }
+};
+
 module.exports = actividadCtrl;

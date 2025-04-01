@@ -9,6 +9,7 @@ const {
   updateActividadById,
   deleteActividadById,
   getActividadesPorUsuario,
+  getActividadesPorUsuarioYMes,
 } = require("../controllers/actividad.controller");
 
 router
@@ -23,5 +24,9 @@ router
   .get(authMiddleware, getActividadById)
   .put(authMiddleware, updateActividadById)
   .delete(authMiddleware, deleteActividadById);
+
+router
+  .route("/por-usuario/:id")
+  .get(authMiddleware, getActividadesPorUsuarioYMes);
 
 module.exports = router;
