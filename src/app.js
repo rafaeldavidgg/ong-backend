@@ -23,6 +23,7 @@ app.use("/api/solicitudes", require("./routes/solicitudes"));
 app.use("/api/tipo-actividades", require("./routes/tipoActividad"));
 app.use("/api/actividades", require("./routes/actividad"));
 app.use("/api/incidencias", require("./routes/incidencia"));
+app.use("/api/eventos", require("./routes/evento"));
 
 require("./cron/notificacionActividades");
 
