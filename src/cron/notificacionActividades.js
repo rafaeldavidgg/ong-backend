@@ -188,6 +188,8 @@ const enviarNotificacionesActividades = async () => {
   }
 };
 
-cron.schedule("0 21 * * *", enviarNotificacionesActividades);
+if (process.env.NODE_ENV !== "test") {
+  cron.schedule("0 21 * * *", enviarNotificacionesActividades);
+}
 
 module.exports = enviarNotificacionesActividades;
