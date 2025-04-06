@@ -1,7 +1,7 @@
 require("dotenv").config();
-require("./database");
+require("../database");
 
-const enviarNotificaciones = require("./cron/notificacionActividades");
+const enviarNotificaciones = require("../cron/notificacionActividades");
 
 enviarNotificaciones()
   .then(() => {
